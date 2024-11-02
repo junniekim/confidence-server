@@ -1,9 +1,21 @@
 import express, { json } from "express";
 import cors from "cors";
 import userRoutes from "./src/routes/userRoutes.js";
+import mongoose from "mongoose";
 const app = express();
 app.use(json());
-
+const connectionString = "mongodb://localhost:27017/Confidence";
+mongoose
+  .connect(connectionString, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.log("MongoDB connected successfully");
+  })
+  .catch((err) => {
+    console.error("MongoDB connection error:", err);
+  });
 const corsOptions = {
   origin: "*",
   credentials: true,

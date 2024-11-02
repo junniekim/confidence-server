@@ -8,7 +8,7 @@ router.post("/signup", async (req, res) => {
     req.body;
 
   // Check for required fields
-  if (!firstName || !lastName || !emailAddress || !password) {
+  if (!firstName || !birthday || !lastName || !emailAddress || !password) {
     return res.status(400).json({
       error:
         "Please provide first Name, last Name, email address, and password.",
@@ -34,8 +34,6 @@ router.post("/signup", async (req, res) => {
       message: "User created successfully.",
       data: {
         id: newUser._id,
-        firstName: newUser.firstName,
-        lastName: newUser.lastName,
       },
     });
   } catch (error) {
@@ -57,8 +55,6 @@ router.post("/signin", async (req, res) => {
         message: "User located successfully",
         data: {
           id: user._id,
-          firstName: user.firstName,
-          lastName: user.lastName,
         },
       });
     } else {

@@ -74,7 +74,7 @@ router.get("/data/:id", async (req, res) => {
           birthday: user.birthday,
           phoneNumber: user.phoneNumber,
           emailAddress: user.emailAddress,
-          bodyWeightHistory: user.bodyWeightHistory,
+          progress: user.progress,
         },
       });
     } else {

@@ -31,7 +31,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: generateRandomWord(),
   },
-  bodyWeightHistory: {
+  progress: {
     type: [
       {
         recordedOn: {
@@ -41,6 +41,14 @@ const userSchema = new mongoose.Schema({
         weight: {
           type: Number,
           required: true,
+        },
+        rate: {
+          type: Number,
+          default: 5,
+        },
+        journal: {
+          type: String,
+          default: "",
         },
       },
     ],

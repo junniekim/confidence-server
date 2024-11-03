@@ -2,6 +2,7 @@ import express, { json } from "express";
 import cors from "cors";
 import userRoutes from "./src/routes/userRoutes.js";
 import workoutRoutes from "./src/routes/workoutRoutes.js";
+import logRoutes from "./src/routes/logRoutes.js";
 import mongoose from "mongoose";
 const app = express();
 app.use(json());
@@ -30,3 +31,4 @@ app.listen(3000, () => {
 // Use the user routes
 app.use("/user", userRoutes);
 app.use("/workout", workoutRoutes);
+app.use("/log", logRoutes);

@@ -128,6 +128,47 @@ router.put("/data/:id", async (req, res) => {
   }
 });
 
+router.put("/data/journal/:id", async (req, res) => {
+  const { id } = req.params;
+  const givenJournal = req.body;
+  console.log("Server received:", givenJournal);
+  try {
+    const updateResult = await User.updateOne(
+      { _id: id },
+      {
+        $set: {
+          "progress.$[elem].rate": givenJournal.rate,
+          "progress.$[elem].weight": givenJournal.weight,
+          "progress.$[elem].journal": givenJournal.journal,
+        },
+      },
+      {
+        arrayFilters: [{ "elem.recordedOn": givenJournal.recordedOn }],
+        new: true,
+      }
+    );
+    if (updateResult.modifiedCount === 0) {
+      await User.findByIdAndUpdate(
+        id,
+        {
+          $push: {
+            progress: {
+              recordedOn: givenJournal.recordedOn,
+              rate: givenJournal.rate,
+              weight: givenJournal.weight,
+              journal: givenJournal.journal,
+            },
+          },
+        },
+        { new: true }
+      );
+    }
+  } catch (error) {
+    console.error("Error updating user:", error);
+    res.status(500).json({ error: "Failed to update journal" });
+  }
+});
+
 //Delete user
 router.delete("/data/:id", async (req, res) => {
   const { id } = req.params;

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { generateRandomWord } from "../helper.js";
 const userSchema = new mongoose.Schema({
   password: {
     type: String,
@@ -28,7 +29,7 @@ const userSchema = new mongoose.Schema({
   },
   temporary: {
     type: String,
-    required: false,
+    default: generateRandomWord(),
   },
   bodyWeightHistory: {
     type: [

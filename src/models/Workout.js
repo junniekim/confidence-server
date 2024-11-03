@@ -1,16 +1,8 @@
 import mongoose from "mongoose";
 const workoutSchema = new mongoose.Schema({
-  dateentered: {
-    type: Date,
-    default: Date.now,
-  },
   name: {
     type: String,
     required: true,
-  },
-  custom: {
-    type: Boolean,
-    default: false,
   },
   target: {
     type: [String],
@@ -19,6 +11,10 @@ const workoutSchema = new mongoose.Schema({
   cardio: {
     type: Boolean,
     required: true,
+  },
+  picture: {
+    type: String,
+    require: true,
   },
 });
 

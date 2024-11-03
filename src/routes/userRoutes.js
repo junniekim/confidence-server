@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 const router = express.Router();
 import User from "../models/User.js";
 
+//create user
 router.post("/signup", async (req, res) => {
   const { firstName, lastName, emailAddress, password, birthday, phoneNumber } =
     req.body;
@@ -39,30 +40,7 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-router.post("/signin", async (req, res) => {
-  const { emailAddress, password } = req.body;
-  console.log(emailAddress, password);
-  try {
-    const user = await User.findOne({ emailAddress: emailAddress });
-
-    if (user && (await bcrypt.compare(password, user.password))) {
-      console.log(new Date());
-      console.log("Sign In - Success");
-      res.status(200).json({
-        message: "User located successfully",
-        data: {
-          id: user._id,
-        },
-      });
-    } else {
-      return res.status(400).json({ error: "Invalid email or password." });
-    }
-  } catch (error) {
-    console.error("Error signing in:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
+//Get user
 router.get("/data/:id", async (req, res) => {
   const { id } = req.params;
   console.log(id);
@@ -93,6 +71,7 @@ router.get("/data/:id", async (req, res) => {
   }
 });
 
+//Update user
 router.put("/data/:id", async (req, res) => {
   const { id } = req.params;
   const { firstName, lastName, birthday, phoneNumber, emailAddress, password } =
@@ -146,6 +125,31 @@ router.delete("/data/:id", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+//sign in
+router.post("/signin", async (req, res) => {
+  const { emailAddress, password } = req.body;
+  console.log(emailAddress, password);
+  try {
+    const user = await User.findOne({ emailAddress: emailAddress });
+
+    if (user && (await bcrypt.compare(password, user.password))) {
+      console.log(new Date());
+      console.log("Sign In - Success");
+      res.status(200).json({
+        message: "User located successfully",
+        data: {
+          id: user._id,
+        },
+      });
+    } else {
+      return res.status(400).json({ error: "Invalid email or password." });
+    }
+  } catch (error) {
+    console.error("Error signing in:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 export default router;

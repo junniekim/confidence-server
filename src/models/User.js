@@ -26,6 +26,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
+  temporary: {
+    type: String,
+    required: false,
+  },
   bodyWeightHistory: {
     type: [
       {

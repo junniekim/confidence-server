@@ -2,6 +2,20 @@ import express from "express";
 import bcrypt from "bcrypt";
 const router = express.Router();
 import User from "../models/User.js";
+import nodemailer from "nodemailer";
+import dotenv from "dotenv";
+dotenv.config();
+function generateRandomWord() {
+  const characters =
+    "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*";
+  const wordLength = 12;
+  let randomWord = "";
+  for (let i = 0; i < wordLength; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    randomWord += characters[randomIndex];
+  }
+  return randomWord;
+}
 
 //create user
 router.post("/signup", async (req, res) => {
@@ -16,6 +30,18 @@ router.post("/signup", async (req, res) => {
   }
   const saltRounds = 10;
   const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+  try {
+    const user = await User.findOne({ emailAddress: emailAddress });
+    if (user) {
+      return res.status(400).json({
+        error: "The email already exists in the system. ",
+      });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+
   try {
     const newUser = new User({
       firstName,
@@ -144,12 +170,69 @@ router.post("/signin", async (req, res) => {
           id: user._id,
         },
       });
+    } else if (user && (await bcrypt.compare(password, user.temporary))) {
+      console.log(new Date());
+      console.log("Sign In - Success");
+      res.status(200).json({
+        message: "User located successfully",
+        data: {
+          id: user._id,
+        },
+      });
     } else {
       return res.status(400).json({ error: "Invalid email or password." });
     }
   } catch (error) {
     console.error("Error signing in:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+//password reset
+
+router.put("/reset", async (req, res) => {
+  // const mail_key = import.meta.env.VITE_MAIL_KEY;
+  const { emailAddress } = req.body;
+  const saltRounds = 10;
+  const unhashedPassword = generateRandomWord();
+  const hashedTemporaryPassword = await bcrypt.hash(
+    unhashedPassword,
+    saltRounds
+  );
+  try {
+    const user = await User.findOneAndUpdate(
+      { emailAddress: emailAddress },
+      { temporary: hashedTemporaryPassword }
+      // { new: true }
+    );
+    if (user) {
+      let transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: "junniekim12@gmail.com",
+          pass: process.env.VITE_MAIL_KEY,
+        },
+      });
+      let mailOptions = {
+        from: "junniekim12@gmail.com",
+        to: emailAddress,
+        subject: "Confidence Password Reset",
+        text: `Hello ${user.firstName},\n\nYour temporary password is: ${unhashedPassword}\n\nPlease use this temporary password to login and reset your password.\n\nThank you,\nConfidence Team`,
+      };
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.log(error);
+        } else {
+          console.log("Email sent: " + info.response);
+        }
+      });
+      res.status(200).json({ message: "EMail sent" });
+    } else {
+      res.status(404).json({ error: "User not found" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 export default router;

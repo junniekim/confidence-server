@@ -128,6 +128,7 @@ router.put("/data/:id", async (req, res) => {
   }
 });
 
+// update progress for each user
 router.put("/data/journal/:id", async (req, res) => {
   const { id } = req.params;
   const givenJournal = req.body;
@@ -220,7 +221,6 @@ router.post("/signin", async (req, res) => {
 });
 
 //password reset
-
 router.put("/reset", async (req, res) => {
   // const mail_key = import.meta.env.VITE_MAIL_KEY;
   const { emailAddress } = req.body;
@@ -266,4 +266,27 @@ router.put("/reset", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
+//Get user progress only
+router.get("/data/analyze/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const user = await User.findOne({ _id: id });
+    if (user) {
+      res.status(200).json({
+        message: "User located successfully",
+        data: {
+          progress: user.progress,
+        },
+      });
+    } else {
+      return res
+        .status(400)
+        .json({ error: "Something went wrong. Please try again" });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 export default router;

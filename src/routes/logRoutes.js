@@ -1,6 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 const router = express.Router();
+import Workout from "../models/Workout.js";
 import Log from "../models/Log.js";
 //Get log for a given user
 router.get("/data/:id", async (req, res) => {
@@ -9,6 +10,39 @@ router.get("/data/:id", async (req, res) => {
     const logs = await Log.find({ user: new mongoose.Types.ObjectId(id) });
     res.status(200).json({
       data: logs,
+    });
+  } catch (error) {
+    console.error("Error fetching log:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.get("/data/joined/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const logs = await Log.find({ user: new mongoose.Types.ObjectId(id) });
+
+    const workoutIds = logs
+      .map((log) => log.workout)
+      .filter((workout) => workout);
+
+    const workouts =
+      workoutIds.length > 0
+        ? await Workout.find({ _id: { $in: workoutIds } })
+        : [];
+
+    const workoutMap = workouts.reduce((map, workout) => {
+      map[workout._id] = workout;
+      return map;
+    }, {});
+
+    const enrichedLogs = logs.map((log) => ({
+      ...log.toObject(),
+      workout: workoutMap[log.workout] || null,
+    }));
+
+    res.status(200).json({
+      data: enrichedLogs,
     });
   } catch (error) {
     console.error("Error fetching log:", error);
